@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.management.product.model.dao.ProductDAO">
+
+    <resultMap id="productResultMap" type="com.management.product.model.dto.ProductDTO">
+        <id property="productCode" column="product_code"/>
+        <result property="productName" column="product_name"/>
+        <result property="originalCost" column="original_cost"/>
+        <result property="releaseDate" column="release_date"/>
+        <result property="discountRate" column="discount_rate"/>
+        <result property="salesQuantity" column="sales_quantity"/>
+        <result property="stockQuantity" column="stock_quantity"/>
+        <result property="categoryCode" column="category_code"/>
+        <result property="productionStatus" column="production_status"/>
+    </resultMap>
+    <select id="selectAllProductList" resultMap="productResultMap">
+        SELECT PRODUCT_CODE,
+               PRODUCT_NAME,
+               ORIGINAL_COST,
+               RELEASE_DATE,
+               DISCOUNT_RATE,
+               SALES_QUANTITY,
+               STOCK_QUANTITY,
+               CATEGORY_CODE,
+               PRODUCTION_STATUS
+        FROM PRODUCTS
+    </select>
+
+    <select id="selectProductByCondition" parameterType="SearchCondition" resultMap="productResultMap">
+        SELECT PRODUCT_CODE,
+        PRODUCT_NAME,
+        ORIGINAL_COST,
+        RELEASE_DATE,
+        DISCOUNT_RATE,
+        SALES_QUANTITY,
+        STOCK_QUANTITY,
+        CATEGORY_CODE,
+        PRODUCTION_STATUS
+        FROM PRODUCTS
+        WHERE 1=1
+        <choose>
+            <when test="option == 'productName'">
+                AND PRODUCT_NAME LIKE CONCAT('%', #{value}, '%')
+            </when>
+            <when test="option == 'newProduct'">
+                AND MONTH(RELEASE_DATE) = MONTH(CURDATE())
+                AND YEAR(RELEASE_DATE) = YEAR(CURDATE())
+            </when>
+            <when test="option == 'nonProduction">
+                AND PRODUCTION_STATUS = 'N'
+            </when>
+        </choose>
+    </select>
+
+
+
+
+
+    <insert id="insertProduct" parameterType="ProductDTO">
+        INSERT INTO PRODUCTS (PRODUCT_CODE,
+                              PRODUCT_NAME,
+                              ORIGINAL_COST,
+                              RELEASE_DATE,
+                              DISCOUNT_RATE,
+                              SALES_QUANTITY,
+                              STOCK_QUANTITY,
+                              CATEGORY_CODE,
+                              PRODUCTION_STATUS)
+        VALUES (#{productCode},
+                #{productName},
+                #{originalCost},
+                #{releaseDate},
+                #{discountRate},
+                #{salesQuantity},
+                #{stockQuantity},
+                #{categoryCode},
+                #{productionStatus})
+    </insert>
+
+    <update id="updateProduct" parameterType="ProductDTO">
+        UPDATE PRODUCTS
+        <set>
+            <if test="productName != 'SKIP'">
+                PRODUCT_NAME = #{productName},
+            </if>
+            <if test="productPrice != 'SKIP'">
+                PRODUCT_PRICE = #{productPrice},
+            </if>
+            <if test="originalCost != 'SKIP'">
+                ORIGINAL_COST = #{originalCost},
+            </if>
+            <if test="releaseDate != 'SKIP'">
+                RELEASE_DATE = #{releaseDate},
+            </if>
+            <if test="discountRate != 'SKIP'">
+                DISCOUNT_RATE = #{discountRate},
+            </if>
+            <if test="salesQuantity != 'SKIP'">
+                SALES_QUANTITY = #{salesQuantity},
+            </if>
+            <if test="stockQuantity != 'SKIP'">
+                STOCK_QUANTITY = #{stockQuantity},
+            </if>
+            <if test="categoryCode != 'SKIP'">
+                CATEGORY_CODE = #{categoryCode},
+            </if>
+            <if test="productionStatus != 'SKIP'">
+                PRODUCTION_STATUS = #{productionStatus},
+            </if>
+        </set>
+        WHERE PRODUCT_CODE = #{productCode}
+    </update>
+
+
+    <delete id="deleteProduct" parameterType="_int">
+        DELETE
+        FROM PRODUCTS
+        WHERE PRODUCT_CODE = #{ productCode }
+    </delete>
+</mapper>
